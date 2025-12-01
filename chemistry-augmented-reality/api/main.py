@@ -39,7 +39,9 @@ current_level = 0
 
 if os.path.exists(levels_file):
     with open(levels_file, 'r') as f:
-        levels_data = yaml.safe_load(f) or []
+        data = yaml.safe_load(f)
+        if data and 'levels' in data:
+            levels_data = data['levels']
 
 WIDTH, HEIGHT = 1280, 720
 
@@ -68,10 +70,14 @@ async def health_check():
 async def get_levels():
     """Get information about available levels"""
     global current_level
+    objective = "Unknown"
+    if levels_data and current_level < len(levels_data):
+        objective = levels_data[current_level].get("objective", {}).get("name", "Unknown")
+    
     return {
         "total_levels": len(levels_data),
         "current_level": current_level,
-        "current_objective": levels_data[current_level].get("name", "Unknown") if levels_data else "No levels loaded"
+        "current_objective": objective
     }
 
 
@@ -107,13 +113,43 @@ async def process_frame(file: UploadFile = File(...)):
         if ids is not None:
             cv2.aruco.drawDetectedMarkers(frame, corners, ids)
             
+            # Get current level markers info
+            current_level_data = levels_data[current_level] if levels_data and current_level < len(levels_data) else None
+            level_markers = current_level_data.get("markers", []) if current_level_data else []
+            
+            detected_required_count = 0
+            total_required_count = sum(1 for m in level_markers if m.get("required", False))
+            
             # Add text labels for detected markers
             for i, corner in enumerate(corners):
                 marker_id = ids[i][0]
                 center = corner[0].mean(axis=0).astype(int)
-                cv2.putText(frame, f"ID: {marker_id}", (center[0], center[1] - 10),
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        
+                
+                # Determine label based on level data
+                label = f"ID: {marker_id}"
+                color = (0, 255, 0) # Green
+                
+                if marker_id < len(level_markers):
+                    marker_info = level_markers[marker_id]
+                    atoms = marker_info.get("atoms", [])
+                    atom_names = [f"{a['count']}{a['element']}" for a in atoms]
+                    label = "+".join(atom_names)
+                    
+                    if marker_info.get("required", False):
+                        detected_required_count += 1
+                        color = (0, 255, 255) # Yellow for required
+                    else:
+                        color = (200, 200, 200) # Gray for optional
+                
+                cv2.putText(frame, label, (center[0], center[1] - 10),
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+            
+            # Check if objective is met (simple check: are all required markers visible?)
+            # This is a simplification. Real engine checks distance/reaction.
+            if detected_required_count >= total_required_count and total_required_count > 0:
+                cv2.putText(frame, "OBJECTIVE MET!", (50, 50), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
+                
         # Encode as JPEG
         success, encoded_img = cv2.imencode('.jpg', frame)
         
@@ -142,11 +178,12 @@ async def set_level(level_number: int):
             )
         
         current_level = level_number
+        objective = levels_data[level_number].get("objective", {}).get("name", "Unknown")
         
         return {
             "status": "success",
             "current_level": level_number,
-            "objective": levels_data[level_number].get("name", "Unknown") if levels_data else "Unknown"
+            "objective": objective
         }
         
     except HTTPException:
