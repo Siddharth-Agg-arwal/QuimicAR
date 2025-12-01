@@ -142,13 +142,13 @@ async def process_frame(file: UploadFile = File(...)):
                         color = (200, 200, 200) # Gray for optional
                 
                 cv2.putText(frame, label, (center[0], center[1] - 10),
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+                           cv2.FONT_HERSHEY_SIMPLEX, 1.5, color, 3)
             
             # Check if objective is met (simple check: are all required markers visible?)
             # This is a simplification. Real engine checks distance/reaction.
             if detected_required_count >= total_required_count and total_required_count > 0:
-                cv2.putText(frame, "OBJECTIVE MET!", (50, 50), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
+                cv2.putText(frame, "OBJECTIVE MET!", (50, 100), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 2.5, (0, 255, 0), 5)
                 
         # Encode as JPEG
         success, encoded_img = cv2.imencode('.jpg', frame)
