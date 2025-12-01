@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry AR - Augmented Reality Chemistry Game</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">⚛️</div>
+                <h1>Chemistry AR</h1>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span class="status-text">API Connected</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Level Info Card -->
+            <section class="card level-card">
+                <h2>Current Level</h2>
+                <div class="level-info">
+                    <div class="level-number">
+                        <span class="label">Level</span>
+                        <span class="value" id="currentLevel">-</span>
+                    </div>
+                    <div class="level-objective">
+                        <span class="label">Objective</span>
+                        <span class="value" id="objective">Loading...</span>
+                    </div>
+                    <div class="level-total">
+                        <span class="label">Total Levels</span>
+                        <span class="value" id="totalLevels">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Image Upload Card -->
+            <section class="card upload-card">
+                <h2>Process AR Frame</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📸</div>
+                    <p class="upload-text">Drop image here or click to upload</p>
+                    <p class="upload-hint">Support for JPG, PNG images</p>
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                </div>
+                <button class="btn btn-primary" id="uploadBtn" style="display: none;">
+                    <span>Process Image</span>
+                </button>
+            </section>
+
+            <!-- Result Card -->
+            <section class="card result-card" id="resultCard" style="display: none;">
+                <h2>Processed Result</h2>
+                <div class="result-container">
+                    <img id="resultImage" alt="Processed AR result">
+                </div>
+                <button class="btn btn-secondary" id="downloadBtn">
+                    <span>Download Result</span>
+                </button>
+            </section>
+
+            <!-- Level Controls -->
+            <section class="card controls-card">
+                <h2>Level Controls</h2>
+                <div class="controls">
+                    <button class="btn btn-outline" id="prevLevel">
+                        <span>← Previous</span>
+                    </button>
+                    <select class="level-select" id="levelSelect">
+                        <option value="0">Level 0 - Water</option>
+                        <option value="1">Level 1 - Hydrogen Peroxide</option>
+                        <option value="2">Level 2 - Methane</option>
+                        <option value="3">Level 3 - Ammonia</option>
+                        <option value="4">Level 4 - Carbon Dioxide</option>
+                    </select>
+                    <button class="btn btn-outline" id="nextLevel">
+                        <span>Next →</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- API Status -->
+            <section class="card api-card">
+                <h2>API Endpoints</h2>
+                <div class="api-list">
+                    <div class="api-item">
+                        <span class="api-method get">GET</span>
+                        <span class="api-path">/</span>
+                        <span class="api-status" id="healthStatus">●</span>
+                    </div>
+                    <div class="api-item">
+                        <span class="api-method get">GET</span>
+                        <span class="api-path">/levels</span>
+                        <span class="api-status" id="levelsStatus">●</span>
+                    </div>
+                    <div class="api-item">
+                        <span class="api-method post">POST</span>
+                        <span class="api-path">/set_level/{id}</span>
+                        <span class="api-status" id="setLevelStatus">●</span>
+                    </div>
+                    <div class="api-item">
+                        <span class="api-method post">POST</span>
+                        <span class="api-path">/process_frame</span>
+                        <span class="api-status" id="processStatus">●</span>
+                    </div>
+                </div>
+                <a href="/docs" target="_blank" class="api-docs-link">
+                    View API Documentation →
+                </a>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Chemistry AR API v1.0.0 | Built with FastAPI</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
